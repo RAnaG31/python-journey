@@ -4,31 +4,33 @@ def main():
         "Food": ["restaurant", "grocery", "cafe", "coffee", "dinner", "lunch", "breakfast", "brunch"],
         "Transport": ["bus", "train", "taxi", "uber", "gas", "fuel", "boat"],
         "Entertainment": ["movie", "concert", "game", "party", "club"],
-        "Utilities": ["electricity", "water", "internet", "rent",],
+        "Utilities": ["electricity", "water", "internet", "rent"],
         "Others": []
     }
 
-    # List to store expenses
-    expenses = []
+    # Dictionary to store expenses by month
+    monthly_expenses = {}
 
-    def add_expense(amount, description):
+    def add_expense(amount, description, month):
         category = categorize_expense(description)
         expense = {
             "amount": amount,
             "description": description,
             "category": category
         }
-        expenses.append(expense)
-        print("Added expense: " + description + " - $" + str(amount) + " to " + category)
+        if month not in monthly_expenses:
+            monthly_expenses[month] = []
+        monthly_expenses[month].append(expense)
+        print("Added expense: " + description + " - €" + str(amount) + " to " + category + " for " + month)
 
-    def view_expenses():
-        if not expenses:
-            print("No expenses recorded.")
+    def view_expenses(month):
+        if month not in monthly_expenses:
+            print("No expenses recorded for " + month + ".")
             return
 
-        print("\nExpenses for June 2024:")
-        for i, expense in enumerate(expenses, 1):
-            print(str(i) + ". " + expense['description'] + " - $" + str(expense['amount']) + " (" + expense['category'] + ")")
+        print("\nExpenses for " + month + ":")
+        for i, expense in enumerate(monthly_expenses[month], 1):
+            print(str(i) + ". " + expense['description'] + " - €" + str(expense['amount']) + " (" + expense['category'] + ")")
 
     def categorize_expense(description):
         for category, keywords in categories.items():
@@ -37,20 +39,24 @@ def main():
                     return category
         return "Others"
 
-    def view_total_by_category():
+    def view_total_by_category(month):
+        if month not in monthly_expenses:
+            print("No expenses recorded for " + month + ".")
+            return
+
         totals = {}
-        for expense in expenses:
+        for expense in monthly_expenses[month]:
             category = expense['category']
             totals[category] = totals.get(category, 0) + expense['amount']
         
-        print("\nTotal expenses by category for June 2024:")
+        print("\nTotal expenses by category for " + month + ":")
         for category, total in totals.items():
             print(category + ": €" + "{:.2f}".format(total))
 
     print("You are checking your balance for June 2024")
 
     while True:
-        print("\nExpense Categorization Tool: 1. Add Expense  2. View Expenses  3. View Total by Category  4. Exit")
+        print("\nExpense Categorization Tool: 1. Add Expense  2. View Expenses  3. View Total by Category  4. Clear Expenses for Current Month and Start a New Month  5. Exit")
 
         choice = input("Choose an option: ")
 
@@ -61,18 +67,50 @@ def main():
                 if not description.islower() or len(description.split()) != 1:
                     print("Please enter a single word using lowercase letters.")
                     continue
-                add_expense(amount, description)
+                month_choice = input("Add to 1 - current month or 2 - previous month? ").strip()
+                if month_choice == '1':
+                    month = "june"
+                elif month_choice == '2':
+                    month = input("Enter previous month (e.g., january): ").strip().lower()
+                    if not month.islower() or len(month.split()) != 1:
+                        print("Please enter a single word using lowercase letters for the month.")
+                        continue
+                else:
+                    print("Invalid choice for month. Please try again.")
+                    continue
+                add_expense(amount, description, month)
             except ValueError:
                 print("Invalid amount. Please enter a number.")
         elif choice == '2':
-            view_expenses()
+            month = input("Enter month to view expenses for (e.g., june): ").strip().lower()
+            if not month.islower() or len(month.split()) != 1:
+                print("Please enter a single word using lowercase letters for the month.")
+                continue
+            view_expenses(month)
         elif choice == '3':
-            view_total_by_category()
+            month = input("Enter month to view total by category for (e.g., june): ").strip().lower()
+            if not month.islower() or len(month.split()) != 1:
+                print("Please enter a single word using lowercase letters for the month.")
+                continue
+            view_total_by_category(month)
         elif choice == '4':
+            clear_month = input("Enter the month to clear expenses for and start a new month (e.g., june): ").strip().lower()
+            if not clear_month.islower() or len(clear_month.split()) != 1:
+                print("Please enter a single word using lowercase letters for the month.")
+                continue
+            if clear_month in monthly_expenses:
+                confirmation = input("Are you sure that you want to clear everything for " + clear_month + "? (yes/no): ").strip().lower()
+                if confirmation == "yes":
+                    monthly_expenses.pop(clear_month, None)
+                    print("Expenses for " + clear_month + " cleared. You can now start a new month.")
+                else:
+                    print("Clear expenses operation cancelled.")
+            else:
+                print("No expenses found for " + clear_month + ".")
+        elif choice == '5':
             break
         else:
             print("Invalid choice. Please try again.")
 
 if __name__ == "__main__":
     main()
-
