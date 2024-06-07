@@ -1,0 +1,78 @@
+def main():
+    # Predefined categories and their keywords
+    categories = {
+        "Food": ["restaurant", "grocery", "cafe", "coffee", "dinner", "lunch", "breakfast", "brunch"],
+        "Transport": ["bus", "train", "taxi", "uber", "gas", "fuel", "boat"],
+        "Entertainment": ["movie", "concert", "game", "party", "club"],
+        "Utilities": ["electricity", "water", "internet", "rent",],
+        "Others": []
+    }
+
+    # List to store expenses
+    expenses = []
+
+    def add_expense(amount, description):
+        category = categorize_expense(description)
+        expense = {
+            "amount": amount,
+            "description": description,
+            "category": category
+        }
+        expenses.append(expense)
+        print("Added expense: " + description + " - $" + str(amount) + " to " + category)
+
+    def view_expenses():
+        if not expenses:
+            print("No expenses recorded.")
+            return
+
+        print("\nExpenses for June 2024:")
+        for i, expense in enumerate(expenses, 1):
+            print(str(i) + ". " + expense['description'] + " - $" + str(expense['amount']) + " (" + expense['category'] + ")")
+
+    def categorize_expense(description):
+        for category, keywords in categories.items():
+            for keyword in keywords:
+                if keyword in description.lower():
+                    return category
+        return "Others"
+
+    def view_total_by_category():
+        totals = {}
+        for expense in expenses:
+            category = expense['category']
+            totals[category] = totals.get(category, 0) + expense['amount']
+        
+        print("\nTotal expenses by category for June 2024:")
+        for category, total in totals.items():
+            print(category + ": €" + "{:.2f}".format(total))
+
+    print("You are checking your balance for June 2024")
+
+    while True:
+        print("\nExpense Categorization Tool: 1. Add Expense  2. View Expenses  3. View Total by Category  4. Exit")
+
+        choice = input("Choose an option: ")
+
+        if choice == '1':
+            try:
+                amount = float(input("Enter amount: "))
+                description = input("Enter description (use a single word in lowercase): ")
+                if not description.islower() or len(description.split()) != 1:
+                    print("Please enter a single word using lowercase letters.")
+                    continue
+                add_expense(amount, description)
+            except ValueError:
+                print("Invalid amount. Please enter a number.")
+        elif choice == '2':
+            view_expenses()
+        elif choice == '3':
+            view_total_by_category()
+        elif choice == '4':
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
+if __name__ == "__main__":
+    main()
+
